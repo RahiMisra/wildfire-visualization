@@ -29,7 +29,19 @@ app.get('/data/:date', (req, res) => {
   const results = [];
   fs.createReadStream(filePath)
     .pipe(csv())
-    .on('data', (data) => results.push(data))
+    .on('data', (row) => {
+      results.push({
+      Date: row.Date,
+      Latitude: parseFloat(row.Latitude),
+      Longitude: parseFloat(row.Longitude),
+      Elevation: parseFloat(row.Elevation),
+      EVI: parseFloat(row.EVI),
+      TA: parseFloat(row.TA),
+      LST: parseFloat(row.LST),
+      Wind: parseFloat(row.Wind),
+      Fire: parseInt(row.Fire),
+      });
+    })
     .on('end', () => {
       cachedFile = filename;
       cachedData = results;
