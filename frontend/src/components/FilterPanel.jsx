@@ -1,0 +1,82 @@
+import React, { useState } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import Slider from '@mui/material/Slider';
+import './FilterPanel.css';
+
+const features = ['Elevation', 'EVI', 'TA', 'LST', 'Wind', 'Fire'];
+
+function FilterPanel({selectedDate, setSelectedDate, selectedFeatures, setSelectedFeatures, featureRanges, activeRanges, setActiveRanges}) {
+
+    // const [selectedDate, setSelectedDate] = useState(new Date('2020-01-01'));
+    // tracks the selected date in the console
+    const handleDateChange = (date) => {
+        // console.log('Date selected:', date);
+        setSelectedDate(date);
+    };
+
+    // initialize all features to true
+    // const [toggledFeatures, setToggledFeatures] = useState(() => {
+    //     const initial = {};
+    //     features.forEach(feature => initial[feature] = true);
+    //     return initial;
+    // });
+
+    // swaps the toggle of the selected featurev
+    const swapToggle = (feature) => {
+        setSelectedFeatures(prev => ({
+            ...prev,
+            [feature]: !prev[feature]
+        }));
+    };
+
+    const handleRangeChange = (feature, newRange) => {
+        setActiveRanges(prev => ({
+            ...prev,
+            [feature]: newRange
+        }));
+    };
+
+    return (
+        <div>
+            <div className="date-picker-container">
+                <DatePicker
+                    selected = {selectedDate}
+                    onChange = {handleDateChange}
+                    dateFormat = "yyyy-MM-dd"
+                    placeholderText = "Select a date"
+                    minDate={new Date('2013-01-01')}
+                    maxDate={new Date('2023-12-31')}
+                    showYearDropdown
+                    scrollableYearDropdown
+                />
+            </div>
+            <div className="filter-container">
+                {features.map(feature => (
+                <div key={feature} className="feature-filter">
+                    <label>{feature}</label>
+                    <input
+                        className="feature-checkbox"
+                        type="checkbox"
+                        checked={selectedFeatures[feature]}
+                        onChange={() => swapToggle(feature)}
+                    />
+
+                    <Slider
+                        className="feature-slider"
+                        size="small"
+                        sx={{ width: 150 }}
+                        value={activeRanges[feature]}
+                        onChange={(_, newValue) => handleRangeChange(feature, newValue)}
+                        valueLabelDisplay="auto"
+                        min={featureRanges[feature][0]} 
+                        max={featureRanges[feature][1]}
+                        disableSwap
+                    />
+                </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+export default FilterPanel;
