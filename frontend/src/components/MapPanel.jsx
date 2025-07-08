@@ -2,6 +2,8 @@ import { ScatterplotLayer } from '@deck.gl/layers';
 import { DeckGL } from '@deck.gl/react';
 import {DataFilterExtension} from '@deck.gl/extensions';
 import React, { useEffect, useState, useRef } from 'react';
+import Legend from './Legend';
+import './Legend.css';
 
 const INITIAL_VIEW_STATE = {
     longitude: -123.75,
@@ -52,6 +54,15 @@ function MapPanel({selectedDate, selectedFeatures, featureRanges, setFeatureRang
             .filter(v => !isNaN(v));
         return [Math.min(...values), Math.max(...values)];
     };
+
+    //calculate height based on proportion of value on min/max range
+    const getProportional = (value, minValue, maxValue, minHeight=0, maxHeight=100) => {
+        if (maxValue === minValue) return minHeight;  
+        let t = (value - minValue) / (maxValue - minValue);
+        t = Math.max(0, Math.min(1, t));
+        return minHeight + t * (maxHeight - minHeight);
+    }
+
     const clickHandler = (point) => {
         if (clickCounter.current % 2 === 0) {
             setPointA(point);
@@ -165,11 +176,22 @@ function MapPanel({selectedDate, selectedFeatures, featureRanges, setFeatureRang
         })
     ];
   return (
-    <DeckGL
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-        layers={layers}
-    />
+    // <DeckGL
+    //     initialViewState={INITIAL_VIEW_STATE}
+    //     controller={true}
+    //     layers={layers}
+    // />
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        <DeckGL
+            initialViewState={INITIAL_VIEW_STATE}
+            controller={true}
+            layers={layers}
+            style={{ width: '100%', height: '100%' }}
+        />
+        <div style={{ position: 'absolute', bottom: 100, right: 100 }}>
+            <Legend selectedFeatures={selectedFeatures} />
+        </div>
+  </div>
   );
 }
 

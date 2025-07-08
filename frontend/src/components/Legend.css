@@ -1,0 +1,24 @@
+.legend {
+  font: 12px/1.2 sans-serif;
+  background: #fff;
+  padding: 6px 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.legend-name {
+  margin-right: 6px;
+  white-space: nowrap;
+}
+
+.legend-bar {
+  border: 1px solid #aaa;
+  border-radius: 2px;
+}
