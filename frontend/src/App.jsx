@@ -16,6 +16,7 @@ const initialFeatureRange = {
 };
 
 function App() {
+  const features = ['Elevation', 'EVI', 'TA', 'LST', 'Wind', 'Fire'];
   const [selectedFeatures, setSelectedFeatures] = useState({
     Elevation: false, EVI: false, TA: false, LST: false, Wind: false, Fire: true
   });
@@ -32,6 +33,7 @@ function App() {
     <div className="grid-container">
       <div className="filter-panel">  
         <FilterPanel
+          features={features}
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
           selectedFeatures={selectedFeatures}
@@ -43,6 +45,7 @@ function App() {
       </div>
       <div className="map-panel">
         <MapPanel
+          features={features}
           selectedDate={selectedDate}
           selectedFeatures={selectedFeatures}
           featureRanges={featureRanges}
@@ -61,11 +64,13 @@ function App() {
       </div>
       <div className="point-panel-a">
         <PointPanel
+          features={features}
           point={pointA}
         />
       </div>
       <div className="point-panel-b">
         <PointPanel
+          features={features}
           point={pointB}
         />
       </div>

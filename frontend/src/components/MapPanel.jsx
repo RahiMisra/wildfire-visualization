@@ -13,7 +13,7 @@ const INITIAL_VIEW_STATE = {
     bearing: 0
 };
 
-function MapPanel({selectedDate, selectedFeatures, featureRanges, setFeatureRanges, activeRanges, setActiveRanges, setPointA, setPointB, setPointHover}) {
+function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setFeatureRanges, activeRanges, setActiveRanges, setPointA, setPointB, setPointHover}) {
     const [data, setData] = useState([]);
     const clickCounter = useRef(0);
 
@@ -42,6 +42,7 @@ function MapPanel({selectedDate, selectedFeatures, featureRanges, setFeatureRang
     
     
     const getColorScale = (value, min, max) => {
+        if (max === min) return [0, 0, 0]; // avoid division by zero
         const t = (value - min) / (max - min);
         const r = Math.round(255 * (1 - t));
         const g = Math.round(255 * (1 - t));
@@ -64,13 +65,21 @@ function MapPanel({selectedDate, selectedFeatures, featureRanges, setFeatureRang
     }
 
     const clickHandler = (point) => {
+        const pointInfo = { ...point };
+        console.log('features:', features);
+        features.forEach((feature) => {
+            pointInfo[`${feature}_color`] = getColorScale(pointInfo[feature], featureRanges[feature][0], featureRanges[feature][1]);
+            pointInfo[`${feature}_height`] = getProportional(pointInfo[feature], featureRanges[feature][0], featureRanges[feature][1]);
+        })
+
         if (clickCounter.current % 2 === 0) {
-            setPointA(point);
+            setPointA(pointInfo);
         } else {
-            setPointB(point);
+            setPointB(pointInfo);
         }
         clickCounter.current++;
     };
+
     const resetSelection = () => {
         setSelectedPointA(null);
         setSelectedPointB(null);
