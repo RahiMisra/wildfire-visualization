@@ -1,6 +1,3 @@
-
-
-
 function HoverPanel({ point }) {
   if (!point) return <div>No point selected</div>;
 

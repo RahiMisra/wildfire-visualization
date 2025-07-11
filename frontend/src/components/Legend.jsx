@@ -1,4 +1,3 @@
-import React from 'react';
 import './Legend.css';
 
 function Legend({selectedFeatures}) {

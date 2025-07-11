@@ -1,0 +1,52 @@
+.grid-container {
+  display: grid;
+  grid-template-areas:
+    "filter-panel . hover-panel"
+    "map-panel map-panel point-panel-a"
+    "map-panel map-panel point-panel-b";
+  grid-template-columns: 50% 25% 25%;  /* left column, gap, right column */
+  grid-template-rows: 30% 35% 35%;    /* top row small, two bottom rows equal */
+  height: 100vh;
+  width: 100vw;
+  gap: 10px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* Common styles */
+.filter-panel,
+.hover-panel,
+.map-panel,
+.point-panel-a,
+.point-panel-b {
+  border: 1px solid #ccc;
+  padding: 10px;
+  overflow: auto;
+}
+
+/* Specific panel positioning */
+.filter-panel {
+  grid-area: filter-panel;
+  background-color: #f8f8f8;
+}
+
+.hover-panel {
+  grid-area: hover-panel;
+  background-color: #eef;
+}
+
+.map-panel {
+  grid-area: map-panel;
+  background-color: #fff;
+  position: relative;
+}
+
+.point-panel-a {
+  grid-area: point-panel-a;
+  background-color: #fdf4e3;
+}
+
+.point-panel-b {
+  grid-area: point-panel-b;
+  background-color: #fefefe;
+}

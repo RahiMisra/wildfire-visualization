@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import Slider from '@mui/material/Slider';
 import './FilterPanel.css';
 
-const features = ['Elevation', 'EVI', 'TA', 'LST', 'Wind', 'Fire'];
-
-function FilterPanel({selectedDate, setSelectedDate, selectedFeatures, setSelectedFeatures, featureRanges, activeRanges, setActiveRanges}) {
+function FilterPanel({features, selectedDate, setSelectedDate, selectedFeatures, setSelectedFeatures, featureRanges, activeRanges, setActiveRanges}) {
 
     // const [selectedDate, setSelectedDate] = useState(new Date('2020-01-01'));
     // tracks the selected date in the console
@@ -50,7 +47,20 @@ function FilterPanel({selectedDate, setSelectedDate, selectedFeatures, setSelect
                     showYearDropdown
                     scrollableYearDropdown
                 />
+                <button className="download-button" onClick={() => {
+                    const formattedDate = selectedDate.toLocaleDateString('en-CA');
+                    const url = `http://localhost:3001/download/day/${formattedDate}`;
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', `data_${formattedDate}.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                }}>
+                    Download Day
+                </button>
             </div>
+
             <div className="filter-container">
                 {features.map(feature => (
                 <div key={feature} className="feature-filter">
