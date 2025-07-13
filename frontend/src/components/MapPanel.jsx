@@ -8,7 +8,7 @@ import './Legend.css';
 const INITIAL_VIEW_STATE = {
     longitude: -123.75,
     latitude: 41.99,
-    zoom: 1,
+    zoom: 3,
     pitch: 0,
     bearing: 0
 };
@@ -28,6 +28,8 @@ function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setF
                 setData(data);
 
                 const newFeatureRanges = {
+                    Latitude: getMinMax(data, 'Latitude'),
+                    Longitude: getMinMax(data, 'Longitude'),
                     Elevation: getMinMax(data, 'Elevation'),
                     EVI: getMinMax(data, 'EVI'),
                     TA: getMinMax(data, 'TA'),
@@ -35,8 +37,19 @@ function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setF
                     Wind: getMinMax(data, 'Wind'),
                     Fire: [0, 1]
                 };
+                const defaultFeatureRanges = {
+                    Latitude: [newFeatureRanges.Latitude[0], newFeatureRanges.Latitude[0]],
+                    Longitude: [newFeatureRanges.Longitude[0], newFeatureRanges.Longitude[0]],
+                    Elevation: [newFeatureRanges.Elevation[0], newFeatureRanges.Elevation[0]],
+                    EVI: [newFeatureRanges.EVI[0], newFeatureRanges.EVI[0]],
+                    TA: [newFeatureRanges.TA[0], newFeatureRanges.TA[0]],
+                    LST: [newFeatureRanges.LST[0], newFeatureRanges.LST[0]],
+                    Wind: [newFeatureRanges.Wind[0], newFeatureRanges.Wind[0]],
+                    Fire: [newFeatureRanges.Fire[0], newFeatureRanges.Fire[1]],
+                };
+
                 setFeatureRanges(newFeatureRanges);
-                setActiveRanges(newFeatureRanges);
+                setActiveRanges(defaultFeatureRanges);
             });
     }, [formattedDate]);
     
@@ -49,11 +62,20 @@ function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setF
         const b = Math.round(255 * t);
         return [r, g, b];
     };
+
     const getMinMax = (data, feature) => {
-        const values = data
-            .map(d => parseFloat(d[feature]))
-            .filter(v => !isNaN(v));
-        return [Math.min(...values), Math.max(...values)];
+        let min = Infinity;
+        let max = -Infinity;
+
+        for (const d of data) {
+            const value = parseFloat(d[feature]);
+            if (!isNaN(value)) {
+            if (value < min) min = value;
+            if (value > max) max = value;
+            }
+        }
+
+        return [min, max];
     };
 
     //calculate height based on proportion of value on min/max range
@@ -179,9 +201,9 @@ function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setF
             onClick: ({object}) => clickHandler(object),
             onHover: ({object}) => setPointHover(object),
             visible: selectedFeatures.Fire,
-            getFilterValue: d => d.Fire,
-            filterRange: activeRanges.Fire,
-            extensions: [new DataFilterExtension({filterSize: 1})]
+            getFilterValue: d => [d.Fire, d.Latitude, d.Longitude],
+            filterRange: [activeRanges.Fire, activeRanges.Latitude, activeRanges.Longitude],
+            extensions: [new DataFilterExtension({filterSize: 3})]
         })
     ];
   return (

@@ -7,6 +7,8 @@ import PointPanel from './PointPanel';
 
 // base this off of overall data range
 const initialFeatureRange = {
+  Latitude: [0, 1],
+  Longitude: [0, 1],
   Elevation: [0, 1],
   EVI: [0, 1],
   TA: [0, 1],

@@ -85,6 +85,34 @@ function FilterPanel({features, selectedDate, setSelectedDate, selectedFeatures,
                     />
                 </div>
                 ))}
+                <div className="feature-filter">
+                    <label>Latitude</label>
+                    <Slider
+                    className="feature-slider"
+                    size="small"
+                    sx={{ width: 150 }}
+                    value={activeRanges['Latitude']}
+                    onChange={(_, newValue) => handleRangeChange('Latitude', newValue)}
+                    valueLabelDisplay="auto"
+                    min={featureRanges['Latitude'][0]} 
+                    max={featureRanges['Latitude'][1]}
+                    disableSwap
+                    />
+                </div>
+                <div className="feature-filter">
+                    <label>Longitude</label>
+                    <Slider
+                    className="feature-slider"
+                    size="small"
+                    sx={{ width: 150 }}
+                    value={activeRanges['Longitude']}
+                    onChange={(_, newValue) => handleRangeChange('Longitude', newValue)}
+                    valueLabelDisplay="auto"
+                    min={featureRanges['Longitude'][0]} 
+                    max={featureRanges['Longitude'][1]}
+                    disableSwap
+                    />
+                </div>
             </div>
         </div>
     );

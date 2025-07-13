@@ -10,44 +10,79 @@ const app = express();
 const PORT = 3001;
 app.use(cors());
 
+const MAX_CACHE_DAYS = 20;
+const dayCache = new Map();
+
+function addToCache(date, data) {
+  if (dayCache.has(date)) {
+    dayCache.delete(date);
+  } else if (dayCache.size >= MAX_CACHE_DAYS) {
+    const oldestKey = dayCache.keys().next().value;
+    dayCache.delete(oldestKey);
+  }
+  dayCache.set(date, data);
+}
+
 app.get('/', (req, res) => {
   res.send('backend access');
 });
 
-let cachedFile = null;
-let cachedData = null;
 app.get('/data/:date', (req, res) => {
+  
   const date = req.params.date;
   const year = date.split('-')[0];
-  const filename = `${year}data-Backend.csv`;
-  const filePath = path.join(os.homedir(), 'data', filename);
-  
-  if (cachedFile === filename) {
-    const filtered = cachedData.filter(row => row.Date === date);
-    return res.json(filtered);
+  const filename = `${year}data_Elevation.csv`;
+  const filePath = path.join('/home', 'geo-info', 'Data', filename);
+
+  const daySet = new Set();
+  for (let i = 0; i < 5; i++) {
+    const d = new Date(date);
+    d.setDate(d.getDate() + i);
+    daySet.add(d.toLocaleDateString('en-CA'));
   }
   
+  // if (cachedFile === filename) {
+  //   const filtered = cachedData.filter(row => row.Date === date);
+  //   return res.json(filtered);
+  // }
+  
+  if (dayCache.has(date)) {
+    console.log(`Serving ${date} from cache`);
+    return res.json(dayCache.get(date));
+  }
+
   const results = [];
+  let rowCount = 0;
+  let lastLogTime = Date.now();
+
   fs.createReadStream(filePath)
     .pipe(csv())
     .on('data', (row) => {
-      results.push({
-      Date: row.Date,
-      Latitude: parseFloat(row.Latitude),
-      Longitude: parseFloat(row.Longitude),
-      Elevation: parseFloat(row.Elevation),
-      EVI: parseFloat(row.EVI),
-      TA: parseFloat(row.TA),
-      LST: parseFloat(row.LST),
-      Wind: parseFloat(row.Wind),
-      Fire: parseInt(row.Fire),
-      });
+      rowCount++;
+      const now = Date.now();
+      if (now - lastLogTime >= 10000) {
+        console.log(`Processed ${rowCount} rows so far...`);
+        lastLogTime = now;
+      }
+      if (daySet.has(row.Date)) {
+        results.push({
+          Date: row.Date,
+          Latitude: parseFloat(row.Latitude),
+          Longitude: parseFloat(row.Longitude),
+          Elevation: parseFloat(row.Elevation),
+          EVI: parseFloat(row.EVI),
+          TA: parseFloat(row.TA),
+          LST: parseFloat(row.LST),
+          Wind: parseFloat(row.Wind),
+          Fire: parseInt(row.Fire)
+        });
+      }
     })
     .on('end', () => {
-      cachedFile = filename;
-      cachedData = results;
-      const filtered = results.filter(row => row.Date === date);
-      res.json(filtered);
+      console.log(`Finished processing ${rowCount} rows.`);
+      rowCount = 0;
+      addToCache(date, results);
+      res.json(dayCache.get(date));
     })
     .on('error', (err) => {
       console.error('Error reading CSV:', err);
@@ -58,8 +93,8 @@ app.get('/data/:date', (req, res) => {
 app.get('/download/day/:date', (req, res) => {
   const date = req.params.date;
   const year = date.split('-')[0];
-  const filename = `${year}data-Backend.csv`;
-  const filePath = path.join(os.homedir(), 'data', filename);
+  const filename = `${year}data_Elevation.csv`;
+  const filePath = path.join('home', 'geo-info', 'data', filename);
 
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader(
@@ -96,7 +131,8 @@ app.get('/download/day/:date', (req, res) => {
 
 app.get('/download/year/:year', (req, res) => {
   const { year } = req.params;
-  const filePath = path.join(os.homedir(), 'data', `${year}data-Backend.csv`);
+  const filename = `${year}data_Elevation.csv`;
+  const filePath = path.join('home', 'geo-info', 'data', filename);
 
   res.setHeader('Content-Type', 'application/zip');
   res.setHeader(
@@ -114,7 +150,7 @@ app.get('/download/year/:year', (req, res) => {
 
   archive.pipe(res);
 
-  archive.file(filePath, { name: `${year}data-Backend.csv` });
+  archive.file(filePath, {name: filename});
 
   archive.finalize();
 
