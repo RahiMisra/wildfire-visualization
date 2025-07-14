@@ -1,3 +1,6 @@
+# csv
+preprocessing/data/*.csv
+
 
 # Logs
 logs
