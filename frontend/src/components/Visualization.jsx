@@ -4,6 +4,8 @@ import MapPanel from './MapPanel';
 import FilterPanel from './FilterPanel';
 import HoverPanel from './HoverPanel';
 import PointPanel from './PointPanel';
+import ShapPanel from './ShapPanel';
+import FeaturePanel from './FeaturePanel';
 
 // base this off of overall data range
 const initialFeatureRange = {
@@ -31,6 +33,10 @@ function Visualization() {
   const [pointB, setPointB] = useState(null);
   const [pointHover, setPointHover] = useState(null);
 
+  const [activePanel, setActivePanel] = useState('map');
+  const [selectedFeature, setSelectedFeature] = useState(null);
+  const [selectedShap, setSelectedShap] = useState(null);
+
   return (
     <div className="grid-container">
       <div className="filter-panel">  
@@ -46,18 +52,32 @@ function Visualization() {
         />  
       </div>
       <div className="map-panel">
-        <MapPanel
-          features={features}
-          selectedDate={selectedDate}
-          selectedFeatures={selectedFeatures}
-          featureRanges={featureRanges}
-          setFeatureRanges={setFeatureRanges}
-          activeRanges={activeRanges}
-          setActiveRanges={setActiveRanges}
-          setPointA={setPointA}
-          setPointB={setPointB}
-          setPointHover={setPointHover}
-        />
+        {activePanel === 'map' && (
+          <MapPanel
+            features={features}
+            selectedDate={selectedDate}
+            selectedFeatures={selectedFeatures}
+            featureRanges={featureRanges}
+            setFeatureRanges={setFeatureRanges}
+            activeRanges={activeRanges}
+            setActiveRanges={setActiveRanges}
+            setPointA={setPointA}
+            setPointB={setPointB}
+            setPointHover={setPointHover}
+          />
+        )}
+        {activePanel === 'feature' && (
+          <FeaturePanel 
+            onBack={() => setActivePanel('map')}
+            selectedFeature={selectedFeature}
+          />
+        )}
+        {activePanel === 'shap' && (
+          <ShapPanel
+            onBack={() => setActivePanel('map')}
+            selectedShap={selectedShap}
+          />
+        )}
       </div>
       <div className="hover-panel">
         <HoverPanel
@@ -68,12 +88,18 @@ function Visualization() {
         <PointPanel
           features={features}
           point={pointA}
+          setActivePanel={setActivePanel}
+          setSelectedFeature={setSelectedFeature}
+          setSelectedShap={setSelectedShap}
         />
       </div>
       <div className="point-panel-b">
         <PointPanel
           features={features}
           point={pointB}
+          setActivePanel={setActivePanel}
+          setSelectedFeature={setSelectedFeature}
+          setSelectedShap={setSelectedShap}
         />
       </div>
     </div>

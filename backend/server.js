@@ -40,6 +40,8 @@ app.get('/data/:date', (req, res) => {
     d.setDate(d.getDate() + i);
     daySet.add(d.toLocaleDateString('en-CA'));
   }
+  const sortedDayArray = Array.from(daySet).sort();
+  const maxDay = sortedDayArray[sortedDayArray.length - 1];
   
   // if (cachedFile === filename) {
   //   const filtered = cachedData.filter(row => row.Date === date);
@@ -55,12 +57,13 @@ app.get('/data/:date', (req, res) => {
   let rowCount = 0;
   let lastLogTime = Date.now();
 
-  fs.createReadStream(filePath)
-    .pipe(csv())
+  const stream = fs.createReadStream(filePath).pipe(csv());
+
+  stream
     .on('data', (row) => {
       rowCount++;
       const now = Date.now();
-      if (now - lastLogTime >= 10000) {
+      if (now - lastLogTime >= 100000) {
         console.log(`Processed ${rowCount} rows so far...`);
         lastLogTime = now;
       }
@@ -77,6 +80,15 @@ app.get('/data/:date', (req, res) => {
           Fire: parseInt(row.Fire)
         });
       }
+      if (row.Date > maxDay) {
+        console.log(`Reached date ${row.Date} > ${maxDay}, ending stream early`);
+        stream.destroy();
+      }
+    })
+    .on('close', () => {
+      console.log(`Stream closed early after ${rowCount} rows.`);
+      addToCache(date, results);
+      res.json(dayCache.get(date));
     })
     .on('end', () => {
       console.log(`Finished processing ${rowCount} rows.`);

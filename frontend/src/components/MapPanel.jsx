@@ -50,6 +50,7 @@ function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setF
 
                 setFeatureRanges(newFeatureRanges);
                 setActiveRanges(defaultFeatureRanges);
+                console.log('features recieved');
             });
     }, [formattedDate]);
     
