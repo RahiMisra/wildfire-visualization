@@ -1,4 +1,5 @@
 const ShapPanel = ({onBack, selectedShap}) => {
+  console.log(selectedShap);
   return (
     <div className="custom-panel">
       <button onClick={() => onBack()}>← Back to Map</button>

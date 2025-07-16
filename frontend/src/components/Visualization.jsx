@@ -16,14 +16,18 @@ const initialFeatureRange = {
   TA: [0, 1],
   LST: [0, 1],
   Wind: [0, 1],
-  Fire: [0, 1]
+  Fire: [0, 1],
+  Prediction: [0, 1]
 };
 
 function Visualization() {
   const features = ['Elevation', 'EVI', 'TA', 'LST', 'Wind', 'Fire'];
   const [selectedFeatures, setSelectedFeatures] = useState({
-    Elevation: false, EVI: false, TA: false, LST: false, Wind: false, Fire: true
+    Elevation: false, EVI: false, TA: false, LST: false, Wind: false, Fire: true, Prediction: false
   });
+
+  const [predictionEnabled, setPredictionEnabled] = useState(false);
+
   const [selectedDate, setSelectedDate] = useState(new Date(2020, 0, 1));
 
   const [featureRanges, setFeatureRanges] = useState(initialFeatureRange);
@@ -49,6 +53,7 @@ function Visualization() {
           featureRanges={featureRanges}
           activeRanges={activeRanges}
           setActiveRanges={setActiveRanges}
+          predictionEnabled={predictionEnabled}
         />  
       </div>
       <div className="map-panel">
@@ -64,6 +69,8 @@ function Visualization() {
             setPointA={setPointA}
             setPointB={setPointB}
             setPointHover={setPointHover}
+            predictionEnabled={predictionEnabled}
+            setPredictionEnabled={setPredictionEnabled}
           />
         )}
         {activePanel === 'feature' && (
@@ -82,6 +89,7 @@ function Visualization() {
       <div className="hover-panel">
         <HoverPanel
           point={pointHover}
+          features={features}
         />
       </div>
       <div className="point-panel-a">
@@ -91,6 +99,7 @@ function Visualization() {
           setActivePanel={setActivePanel}
           setSelectedFeature={setSelectedFeature}
           setSelectedShap={setSelectedShap}
+          predictionEnabled={predictionEnabled}
         />
       </div>
       <div className="point-panel-b">
@@ -100,6 +109,7 @@ function Visualization() {
           setActivePanel={setActivePanel}
           setSelectedFeature={setSelectedFeature}
           setSelectedShap={setSelectedShap}
+          predictionEnabled={predictionEnabled}
         />
       </div>
     </div>

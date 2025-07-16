@@ -3,7 +3,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import Slider from '@mui/material/Slider';
 import './FilterPanel.css';
 
-function FilterPanel({features, selectedDate, setSelectedDate, selectedFeatures, setSelectedFeatures, featureRanges, activeRanges, setActiveRanges}) {
+function FilterPanel({features, selectedDate, setSelectedDate, selectedFeatures, setSelectedFeatures, featureRanges, activeRanges, setActiveRanges, predictionEnabled}) {
 
     // const [selectedDate, setSelectedDate] = useState(new Date('2020-01-01'));
     // tracks the selected date in the console
@@ -113,6 +113,28 @@ function FilterPanel({features, selectedDate, setSelectedDate, selectedFeatures,
                     disableSwap
                     />
                 </div>
+                {predictionEnabled && (
+                    <div key="Prediction" className="feature-filter">
+                    <label>Prediction</label>
+                    <input
+                        className="feature-checkbox"
+                        type="checkbox"
+                        checked={selectedFeatures.Prediction}
+                        onChange={() => swapToggle('Prediction')}
+                    />
+                    <Slider
+                        className="feature-slider"
+                        size="small"
+                        sx={{ width: 150 }}
+                        value={activeRanges.Prediction}
+                        onChange={(_, newValue) => handleRangeChange('Prediction', newValue)}
+                        valueLabelDisplay="auto"
+                        min={featureRanges.Prediction?.[0] || 0}
+                        max={featureRanges.Prediction?.[1] || 1}
+                        disableSwap
+                    />
+                    </div>
+                )}
             </div>
         </div>
     );

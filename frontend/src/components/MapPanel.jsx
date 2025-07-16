@@ -6,14 +6,14 @@ import Legend from './Legend';
 import './Legend.css';
 
 const INITIAL_VIEW_STATE = {
-    longitude: -123.75,
-    latitude: 41.99,
-    zoom: 3,
+    longitude: -120.00,
+    latitude: 35.00,
+    zoom: 5,
     pitch: 0,
     bearing: 0
 };
 
-function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setFeatureRanges, activeRanges, setActiveRanges, setPointA, setPointB, setPointHover}) {
+function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setFeatureRanges, activeRanges, setActiveRanges, setPointA, setPointB, setPointHover, predictionEnabled, setPredictionEnabled}) {
     const [data, setData] = useState([]);
     const clickCounter = useRef(0);
 
@@ -37,6 +37,7 @@ function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setF
                     Wind: getMinMax(data, 'Wind'),
                     Fire: [0, 1]
                 };
+                
                 const defaultFeatureRanges = {
                     Latitude: [newFeatureRanges.Latitude[0], newFeatureRanges.Latitude[0]],
                     Longitude: [newFeatureRanges.Longitude[0], newFeatureRanges.Longitude[0]],
@@ -47,7 +48,16 @@ function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setF
                     Wind: [newFeatureRanges.Wind[0], newFeatureRanges.Wind[0]],
                     Fire: [newFeatureRanges.Fire[0], newFeatureRanges.Fire[1]],
                 };
-
+                if (data.some(d => 'Prediction' in d)) {
+                    setPredictionEnabled(true);
+                    newFeatureRanges.Prediction = [0, 1];
+                    defaultFeatureRanges.Prediction = [0, 1];
+                    console.log('Prediction data found for this date');
+                    // console.log(data.slice(0, 5));
+                } else {
+                    setPredictionEnabled(false);
+                    console.log('No prediction data found for this date');
+                }
                 setFeatureRanges(newFeatureRanges);
                 setActiveRanges(defaultFeatureRanges);
                 console.log('features recieved');
@@ -122,9 +132,9 @@ function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setF
             onClick: ({object}) => clickHandler(object),
             onHover: ({object}) => setPointHover(object),
             visible: selectedFeatures.Elevation,
-            getFilterValue: d => d.Elevation,
-            filterRange: activeRanges.Elevation,
-            extensions: [new DataFilterExtension({filterSize: 1})]
+            getFilterValue: d => [d.Elevation, d.Latitude, d.Longitude],
+            filterRange: [activeRanges.Elevation, activeRanges.Latitude, activeRanges.Longitude],
+            extensions: [new DataFilterExtension({filterSize: 3})]
         }),
         new ScatterplotLayer({
             id: 'evi-layer',
@@ -138,9 +148,9 @@ function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setF
             onClick: ({object}) => clickHandler(object),
             onHover: ({object}) => setPointHover(object),
             visible: selectedFeatures.EVI,
-            getFilterValue: d => d.EVI,
-            filterRange: activeRanges.EVI,
-            extensions: [new DataFilterExtension({filterSize: 1})]
+            getFilterValue: d => [d.EVI, d.Latitude, d.Longitude],
+            filterRange: [activeRanges.EVI, activeRanges.Latitude, activeRanges.Longitude],
+            extensions: [new DataFilterExtension({filterSize: 3})]
         }),
         new ScatterplotLayer({
             id: 'ta-layer',
@@ -154,9 +164,9 @@ function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setF
             onClick: ({object}) => clickHandler(object),
             onHover: ({object}) => setPointHover(object),
             visible: selectedFeatures.TA,
-            getFilterValue: d => d.TA,
-            filterRange: activeRanges.TA,
-            extensions: [new DataFilterExtension({filterSize: 1})]
+            getFilterValue: d => [d.TA, d.Latitude, d.Longitude],
+            filterRange: [activeRanges.TA, activeRanges.Latitude, activeRanges.Longitude],
+            extensions: [new DataFilterExtension({filterSize: 3})]
         }),
         new ScatterplotLayer({
             id: 'lst-layer',
@@ -170,9 +180,9 @@ function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setF
             onClick: ({object}) => clickHandler(object),
             onHover: ({object}) => setPointHover(object),
             visible: selectedFeatures.LST,
-            getFilterValue: d => d.LST,
-            filterRange: activeRanges.LST,
-            extensions: [new DataFilterExtension({filterSize: 1})]
+            getFilterValue: d => [d.LST, d.Latitude, d.Longitude],
+            filterRange: [activeRanges.LST, activeRanges.Latitude, activeRanges.Longitude],
+            extensions: [new DataFilterExtension({filterSize: 3})]
         }),
         new ScatterplotLayer({
             id: 'wind-layer',
@@ -186,9 +196,9 @@ function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setF
             onClick: ({object}) => clickHandler(object),
             onHover: ({object}) => setPointHover(object),
             visible: selectedFeatures.Wind,
-            getFilterValue: d => d.Wind,
-            filterRange: activeRanges.Wind,
-            extensions: [new DataFilterExtension({filterSize: 1})]
+            getFilterValue: d => [d.Wind, d.Latitude, d.Longitude],
+            filterRange: [activeRanges.Wind, activeRanges.Latitude, activeRanges.Longitude],
+            extensions: [new DataFilterExtension({filterSize: 3})]
         }),
         new ScatterplotLayer({
             id: 'fire-layer',
@@ -204,6 +214,22 @@ function MapPanel({features, selectedDate, selectedFeatures, featureRanges, setF
             visible: selectedFeatures.Fire,
             getFilterValue: d => [d.Fire, d.Latitude, d.Longitude],
             filterRange: [activeRanges.Fire, activeRanges.Latitude, activeRanges.Longitude],
+            extensions: [new DataFilterExtension({filterSize: 3})]
+        }),
+        data.some(d => 'Prediction' in d) && new ScatterplotLayer({
+            id: 'prediction-layer',
+            data: data.filter(d => d.Prediction != null && !isNaN(d.Prediction)),
+            getPosition: d => [d.Longitude, d.Latitude],
+            getRadius: 5,
+            radiusUnits: 'pixels',
+            radiusMinPixels: 5,
+            getFillColor: d => d.Prediction > 0 ? [255, 0, 0] : [0, 0, 0],
+            pickable: true,
+            onClick: ({object}) => clickHandler(object),
+            onHover: ({object}) => setPointHover(object),
+            visible: selectedFeatures.Prediction,
+            getFilterValue: d => [d.Prediction, d.Latitude, d.Longitude],
+            filterRange: [activeRanges.Prediction, activeRanges.Latitude, activeRanges.Longitude],
             extensions: [new DataFilterExtension({filterSize: 3})]
         })
     ];

@@ -1,13 +1,38 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './PointPanel.css';
 
-function PointPanel({features, point, setActivePanel, setSelectedFeature, setSelectedShap}) {
+function PointPanel({features, point, setActivePanel, setSelectedFeature, setSelectedShap, predictionEnabled}) {
+  const [shapEnabled, setShapEnabled] = useState(false);
+  const [shapValues, setShapValues] = useState(null);
   const spatiotemporal = ['Date', 'Longitude', 'Latitude'];
   // useEffect(() => {
   //   console.log('Point data updated:', point);
   // }, [point]);
 
-  if (!point) return <div>No point selected</div>;
+  useEffect(() => {
+    if(!point) return;
+    setShapEnabled(false);
+    setShapValues(null);
+
+    const { Date, Latitude, Longitude } = point;
+    if (!Date || Latitude == null || Longitude == null) return;
+
+    const url = `http://localhost:3001/shap/${Date}/${Latitude}/${Longitude}`;
+
+    fetch(url)
+      .then(res => {
+        if (!res.ok) throw new Error('No SHAP data');
+        return res.json();
+      })
+      .then(data => {
+        setShapValues(data);
+        setShapEnabled(true);
+      })
+      .catch(() => {
+        setShapEnabled(false);
+        setShapValues(null);
+      });
+  }, [point]);
 
   // return (
   //   <div>
@@ -26,15 +51,17 @@ function PointPanel({features, point, setActivePanel, setSelectedFeature, setSel
     setActivePanel('shap');
   };
 
+  if (!point) return <div>No point selected</div>;
+
   return (
     <div>
-      <h3>Point Details</h3>
-
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h3>Point Details</h3>
-        <button onClick={() => handleShapClick?.(point)}>
-          View SHAP
-        </button>
+        {shapEnabled && (
+          <button onClick={() => handleShapClick(shapValues)}>
+            View SHAP
+          </button>
+        )}
       </div>
 
       {spatiotemporal.map((k) => {
@@ -72,6 +99,27 @@ function PointPanel({features, point, setActivePanel, setSelectedFeature, setSel
           </div>
         );
       })}
+      {predictionEnabled && (
+        console.log('Rendering Prediction feature'),
+        <div
+          className="row"
+          key="Prediction"
+          onClick={() => handleFeatureClick?.(point, 'Prediction')}
+          title="Click to view Prediction details"
+        >
+          <span className="label">Prediction</span>
+          <span className="value">{point['Prediction']}</span>
+          <div
+            className="bar"
+            style={{
+              height: '10px',
+              width: `${Math.max(0, Math.min(100, point['Prediction_height']))}px`,
+              backgroundColor: `rgb(${point['Prediction_color']})`,
+              cursor: 'pointer'
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
