@@ -291,6 +291,66 @@ app.get('/download/year/:year', (req, res) => {
 
 });
 
+app.get('/summary/year/:year', (req, res) => {
+  const { year } = req.params;
+  console.log(year);
+  const basePath = '/home';
+  const filePath = path.join(basePath, 'rm579300', 'wildfire-visualization', 'preprocessing', 'data', `all_years_summary.csv`);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+  const stream = fs.createReadStream(filePath).pipe(csv());
+  stream.on('data', row => {
+    if (row['Year'] === year) {
+      res.json(row);
+      stream.destroy();
+    }
+  });
+  stream.on('close', () => {
+  });
+  stream.on('end', () => {
+    if (!res.headersSent) {
+      res.status(404).json({ error: `${year} not found in file` });
+    }
+  });
+  stream.on('error', err => {
+    console.error(`Stream error:`, err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to read summary file' });
+    }
+  });
+});
+
+app.get('/summary/date/:date', (req, res) => {
+  const { date } = req.params;
+  console.log(date);
+  const year = date.split('-')[0];
+  const basePath = '/home';
+  const filePath = path.join(basePath, 'rm579300', 'wildfire-visualization', 'preprocessing', 'data', `${year}_daily_summary.csv`);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+  const stream = fs.createReadStream(filePath).pipe(csv());
+  stream.on('data', row => {
+    if (row['Date'] === date) {
+      res.json(row);
+      stream.destroy();
+    }
+  });
+  stream.on('close', () => {
+  });
+  stream.on('end', () => {
+    if (!res.headersSent) {
+      res.status(404).json({ error: `${date} not found in file` });
+    }
+  });
+  stream.on('error', err => {
+    console.error(`Stream error:`, err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to read summary file' });
+    }
+  });
+});
 
 
 app.listen(PORT, () => {
