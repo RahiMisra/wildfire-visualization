@@ -14,7 +14,6 @@ function DownloadPage() {
         <li><a href="http://localhost:3001/download/year/2020">Download Year 2020</a></li>
         <li><a href="http://localhost:3001/download/year/2021">Download Year 2021</a></li>
         <li><a href="http://localhost:3001/download/year/2022">Download Year 2022</a></li>
-        <li><a href="http://localhost:3001/download/year/2023">Download Year 2023</a></li>
       </ul>
     </div>
   );
